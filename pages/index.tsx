@@ -30,7 +30,8 @@ const Home: NextPage = () => {
     } else {
         setUser(JSON.parse(LocalUser))
     }
-  });
+    console.log(user)
+  }, []);
 
   const chats:any = ["Adi", "hola", "Doing", "Daki"]
  
