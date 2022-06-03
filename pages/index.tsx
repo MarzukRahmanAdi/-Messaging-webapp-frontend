@@ -6,10 +6,14 @@ import { useStyles } from '../styles/index'
 import styles from '../styles/Home.module.css'
 import { ChatIcon } from '@heroicons/react/outline'
 import Message from '../components/Message'
-import { useContext, useEffect, useRef } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { UsersContext } from '../context api/User'
 import { MessageContext } from '../context api/Message'
 import { useRouter } from 'next/router'
+import { NextLink } from '@mantine/next'
+import { InboxContext } from '../context api/Inbox'
+import axios from 'axios'
+import MessageSender from '../components/MessageSender'
 
 const Home: NextPage = () => {
   const {classes} = useStyles()
@@ -17,6 +21,8 @@ const Home: NextPage = () => {
   const messagesEndRef = useRef(null)
   const [user , setUser] = useContext(UsersContext)
   const [message, setMessage] = useContext(MessageContext)
+  const [inbox, setInbox] = useContext(InboxContext)
+  const [currentChat, setCurrentChat] = useState()
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -24,17 +30,35 @@ const Home: NextPage = () => {
   const router = useRouter()
   useEffect(() => {
     scrollToBottom()
-    const LocalUser = localStorage.getItem("User")
+    let LocalUser = localStorage.getItem("User")
     if(!LocalUser){
       router.push("/login")
     } else {
-        setUser(JSON.parse(LocalUser))
+        LocalUser = JSON.parse(LocalUser)
+        setUser(LocalUser)
+        axios.get("http://localhost:3001/users/").then(res =>{
+          const Inboxes = res.data.filter(us => us.id !== user.id)
+          setInbox(Inboxes)
+          inbox.map(x => console.log(x))
+
+        }).catch(err => alert(err))
+
     }
-    console.log(user)
   }, []);
 
   const chats:any = ["Adi", "hola", "Doing", "Daki"]
- 
+
+
+  //getting all the messages
+  function handleCard(id){
+    axios.get(`http://localhost:3001/users/${user.id}/message/${id}`).then(res=>{
+        console.log(res)
+        if(!res.data){
+          setCurrentChat(id)
+        }
+    }).catch(err => alert(err))
+  }
+
   return (
     <div className={classes.root}>
       <Head>
@@ -60,22 +84,23 @@ const Home: NextPage = () => {
           <Grid.Col sx={{background:"#1A202F"}}  span={27}>
             <Grid columns={27}>
               <Grid.Col span={7}>
-                  <Stack sx={{marginTop:"20px"}}>
-                      {chats.map((chat:any) =>(
-                        <Card className='CustomCard' key={chat} sx={{ }}>
-                          <Group>
-                          <Avatar color="cyan" radius="xl">{chat.slice(0, 2)}</Avatar>
-                          <Text >{chat}</Text>
+                  <Stack className='chatBoxHolder' sx={{marginTop:"20px"}}>
+                      {inbox.map((chat:any) =>(
+                        <Card onClick={() => handleCard(`${chat.id}`)}  className='CustomCard' key={chat.id} sx={{ }}>
+                          <Group >
+                          <Avatar color="cyan" radius="xl">{chat.name.slice(0, 2)}</Avatar>
+                          <Text >{chat.name}</Text>
                           </Group>
                         </Card>
                       ))}
                   </Stack>
               </Grid.Col>
-              <Grid.Col className='messageBoxHolder' ref={messagesEndRef}  span={20}>
+              <Grid.Col  ref={messagesEndRef} sx={{position:"relative"}}  span={20}>
                 <Group className='bar'>
                     <Avatar color="cyan" radius="xl">{receiver.slice(0, 2)}</Avatar>
                     <Text sx={{color:"white"}} >{receiver}</Text>
                 </Group>
+                <div className='messageBoxHolder'>
                 <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
                 <Message msg={"hola"} send={false} />
                 <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
@@ -100,7 +125,9 @@ const Home: NextPage = () => {
                 <Message msg={"hola"} send={false} />
                 <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
                 <Message msg={"hola"} send={false} />
-                <div ref={messagesEndRef} />  
+                <div ref={messagesEndRef} />
+              </div>
+              <MessageSender/>
               </Grid.Col>
             </Grid>
           </Grid.Col>

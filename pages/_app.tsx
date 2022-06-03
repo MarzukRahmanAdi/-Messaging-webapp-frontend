@@ -4,6 +4,7 @@ import { MantineProvider } from '@mantine/core'
 import { Tuple } from '@mantine/core';
 import { UsersProvider } from '../context api/User';
 import { MessageProvider } from '../context api/Message';
+import { InboxProvider } from '../context api/Inbox';
 
 
 
@@ -24,9 +25,11 @@ function MyApp({ Component, pageProps }: AppProps) {
     }
   }}>
     <UsersProvider>
-      <MessageProvider>
-      <Component {...pageProps} />
-      </MessageProvider>
+      <InboxProvider>
+        <MessageProvider>
+          <Component {...pageProps} />
+        </MessageProvider>
+      </InboxProvider>
     </UsersProvider>
   </MantineProvider>
   )
