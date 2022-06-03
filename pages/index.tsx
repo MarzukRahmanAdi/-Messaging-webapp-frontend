@@ -53,7 +53,7 @@ const Home: NextPage = () => {
   function handleCard(id){
     axios.get(`http://localhost:3001/users/${user.id}/message/${id}`).then(res=>{
         console.log(res)
-        if(!res.data){
+        if(res.data){
           setCurrentChat(id)
         }
     }).catch(err => alert(err))

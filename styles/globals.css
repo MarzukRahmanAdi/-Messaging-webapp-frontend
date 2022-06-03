@@ -196,6 +196,7 @@ float: right;
 
 .senderIcon{
   float: right;
+  margin-right: 10px;
 }
 .senderIcon:hover{
   background-color: #3D1F99;
