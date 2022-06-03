@@ -1,0 +1,46 @@
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+    /* background-color: #131A2B; */
+    height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.Login_Page{
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background-color: #2A344D;
+  justify-content: center;
+   align-items: center;
+}
+.red{
+  background-color: red;
+}
+.black{
+  background-color: wheat;
+}
+
+.CustomCard{
+  background-color: #151B29;
+  transition: all 2s ease-out;
+}
+
+
+.CustomCard:hover{
+  cursor: pointer;
+  color: white;
+  background: rgb(251,48,89);
+  background: linear-gradient(90deg, rgba(251,48,89,1) 0%, rgba(251,48,89,1) 37%, rgba(126,36,207,1) 100%);
+}
