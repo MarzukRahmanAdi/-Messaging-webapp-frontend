@@ -15,6 +15,6 @@
     "jsx": "preserve",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "context api/Message.js", "context api/Inbox.js", "context api/User.js"],
   "exclude": ["node_modules"]
 }

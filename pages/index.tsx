@@ -5,30 +5,35 @@ import Image from 'next/image'
 import { useStyles } from '../styles/index'
 import styles from '../styles/Home.module.css'
 import { ChatIcon } from '@heroicons/react/outline'
+import Message from '../components/Message'
+import { useContext, useEffect, useRef } from 'react'
+import { UsersContext } from '../context api/User'
+import { MessageContext } from '../context api/Message'
+import { useRouter } from 'next/router'
 
 const Home: NextPage = () => {
   const {classes} = useStyles()
+  const receiver = "Jony"
+  const messagesEndRef = useRef(null)
+  const [user , setUser] = useContext(UsersContext)
+  const [message, setMessage] = useContext(MessageContext)
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+  const router = useRouter()
+  useEffect(() => {
+    scrollToBottom()
+    const LocalUser = localStorage.getItem("User")
+    if(!LocalUser){
+      router.push("/login")
+    } else {
+        setUser(JSON.parse(LocalUser))
+    }
+  });
+
   const chats:any = ["Adi", "hola", "Doing", "Daki"]
-  const message:any = [
-  {
-    Sender : true
-  },
-  {
-
-  },
-  {
-
-  },
-  {
-
-  },
-  {
-
-  },
-  {
-
-  },
-]
+ 
   return (
     <div className={classes.root}>
       <Head>
@@ -49,38 +54,64 @@ const Home: NextPage = () => {
               </ThemeIcon>
             </Stack>
 
-          </Grid.Col>   
+          </Grid.Col>
 
           <Grid.Col sx={{background:"#1A202F"}}  span={27}>
             <Grid columns={27}>
               <Grid.Col span={7}>
                   <Stack sx={{marginTop:"20px"}}>
-                      {chats.map(chat =>(
-                        <Card className='CustomCard' sx={{ }}>
+                      {chats.map((chat:any) =>(
+                        <Card className='CustomCard' key={chat} sx={{ }}>
                           <Group>
                           <Avatar color="cyan" radius="xl">{chat.slice(0, 2)}</Avatar>
-                            
-                          <Text >{chat}</Text> 
-                          </Group>                          
+                          <Text >{chat}</Text>
+                          </Group>
                         </Card>
                       ))}
                   </Stack>
               </Grid.Col>
-              <Grid.Col  span={20}>
-                      
+              <Grid.Col className='messageBoxHolder' ref={messagesEndRef}  span={20}>
+                <Group className='bar'>
+                    <Avatar color="cyan" radius="xl">{receiver.slice(0, 2)}</Avatar>
+                    <Text sx={{color:"white"}} >{receiver}</Text>
+                </Group>
+                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
+                <Message msg={"hola"} send={false} />
+                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
+                <Message msg={"hola"} send={false} />
+                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
+                <Message msg={"hola"} send={false} />
+                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
+                <Message msg={"hola"} send={false} />
+                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
+                <Message msg={"hola"} send={false} />
+                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
+                <Message msg={"hola"} send={false} />
+                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
+                <Message msg={"hola"} send={false} />
+                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
+                <Message msg={"hola"} send={false} />
+                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
+                <Message msg={"hola"} send={false} />
+                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
+                <Message msg={"hola"} send={false} />
+                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
+                <Message msg={"hola"} send={false} />
+                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
+                <Message msg={"hola"} send={false} />
+                <div ref={messagesEndRef} />  
               </Grid.Col>
             </Grid>
- 
           </Grid.Col>
             <Grid.Col span={7}>
-            
-            </Grid.Col>   
+              <Center sx={{display:"flex", flexDirection:"column", marginTop:"50px"}}>
+                <Avatar sx={{width:"100px", height:"100px", borderRadius:"50px"}} color="cyan" radius="xl">{receiver.slice(0, 2)}</Avatar>
+                <Text sx={{color:"white"}} weight="normal" size="xl" >{receiver}</Text>
+              </Center>
+
+            </Grid.Col>
         </Grid>
       </main>
-
-      <footer className={styles.footer}>
-
-      </footer>
     </div>
   )
 }

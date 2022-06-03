@@ -2,6 +2,10 @@ import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 import { MantineProvider } from '@mantine/core'
 import { Tuple } from '@mantine/core';
+import { UsersProvider } from '../context api/User';
+import { MessageProvider } from '../context api/Message';
+
+
 
 type CustomColors = 'primaryColorName' | 'secondaryColorName';
 
@@ -19,11 +23,12 @@ function MyApp({ Component, pageProps }: AppProps) {
       customDarkColors:["#131A2B", "#080E1A"],
     }
   }}>
-
-  <Component {...pageProps} />
+    <UsersProvider>
+      <MessageProvider>
+      <Component {...pageProps} />
+      </MessageProvider>
+    </UsersProvider>
   </MantineProvider>
-
-  
   )
 }
 

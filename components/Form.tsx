@@ -12,6 +12,8 @@ import {
   Checkbox,
   Anchor,
 } from '@mantine/core';
+import axios from 'axios';
+import { useRouter } from 'next/router';
 // import { GoogleButton, TwitterButton } from '../SocialButtons/SocialButtons';
 
 export default function AuthenticationForm(props: PaperProps<'div'>) {
@@ -29,9 +31,42 @@ export default function AuthenticationForm(props: PaperProps<'div'>) {
       password: (val) => val.length >= 6,
     },
   });
+  const router = useRouter()
+  const handleSubmit = (e) =>{
+    console.log(type)
+    
+    if(type === "login"){
+      // axios.get('http://localhost:3001/users').then((users:any) => {console.log(users.data)})
+      axios.post("http://localhost:3001/users/login", {
+        Password: form.values.password,
+        Email:form.values.email
+      }).then(res =>{
+        console.log(res.data.response)
+        localStorage.setItem("User", JSON.stringify(res.data.response))
+        router.push("/")
+      }).catch(err =>{
+        console.log(err.response.data.message);
+        alert(err.response.data.message ? err.response.data.message : err)
+      })
+    } else {
+      //Create user
+      axios.post("http://localhost:3001/users/", {
+        Name: form.values.name,
+        Password: form.values.password,
+        Email:form.values.email
+      }).then(res =>{
+        console.log(res.data.Response)
+        localStorage.setItem("User", JSON.stringify(res.data.Response))
+        router.push("")
+      }).catch(err =>{
+        console.log(err);
+        // alert(err.response ? err.response.data.message : err)
+      })
+    }
+    console.log(form.values)
+  }
 
   return (
-    
     <Paper radius="md" p="xl" withBorder {...props}>
       <Text size="lg" weight={500}>
         Welcome, {type} with
@@ -44,12 +79,13 @@ export default function AuthenticationForm(props: PaperProps<'div'>) {
 
       <Divider label="Or continue with email" labelPosition="center" my="lg" />
 
-      <form onSubmit={form.onSubmit(() => {})}>
+      <form onSubmit={form.onSubmit((e) => handleSubmit(e))}>
         <Group direction="column" grow>
           {type === 'register' && (
             <TextInput
               label="Name"
               placeholder="Your name"
+              required
               value={form.values.name}
               onChange={(event) => form.setFieldValue('name', event.currentTarget.value)}
             />
