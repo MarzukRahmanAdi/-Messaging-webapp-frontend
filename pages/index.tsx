@@ -17,12 +17,13 @@ import MessageSender from '../components/MessageSender'
 
 const Home: NextPage = () => {
   const {classes} = useStyles()
-  const receiver = "Jony"
+  const [receiver, setReceiver] = useState("")
   const messagesEndRef = useRef(null)
   const [user , setUser] = useContext(UsersContext)
   const [message, setMessage] = useContext(MessageContext)
   const [inbox, setInbox] = useContext(InboxContext)
-  const [currentChat, setCurrentChat] = useState()
+  const [isSender, setIsSender] = useState(false)
+  const [empty, setEmpty] = useState(false)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -37,32 +38,62 @@ const Home: NextPage = () => {
         LocalUser = JSON.parse(LocalUser)
         setUser(LocalUser)
         axios.get("http://localhost:3001/users/").then(res =>{
+          console.log(res.data);
           const Inboxes = res.data.filter(us => us.id !== user.id)
           setInbox(Inboxes)
-          inbox.map(x => console.log(x))
+          // inbox.map(x => console.log(x)) 
 
         }).catch(err => alert(err))
 
     }
   }, []);
 
-  const chats:any = ["Adi", "hola", "Doing", "Daki"]
 
 
   //getting all the messages
-  function handleCard(id){
+  function handleCard(id, name){
+    console.log(user)
     axios.get(`http://localhost:3001/users/${user.id}/message/${id}`).then(res=>{
         console.log(res)
-        if(res.data){
-          setCurrentChat(id)
+        if(res.data[0]){
+          //Some times my server sends a array data.
+          console.log(res.data[0]);
+          setMessage(res.data[0])
+          setReceiver(name)
+
+          if(res.data[0].messages.length !== 0){
+            setEmpty(true)
+          }
+
+          if(res.data[0].Sender === user.id){
+            console.log
+            setIsSender(true)
+          }
+
+        } else if(res.data) {
+          //Some times my server sends a raw data.
+          console.log(res.data);
+          setMessage(res.data)
+          setReceiver(name)
+
+          if(res.data.messages.length !== 0){
+            setEmpty(true)
+          }
+
+          if(res.data.Sender === user.id){
+            console.log
+            setIsSender(true)
+          }
+
         }
+        scrollToBottom()
     }).catch(err => alert(err))
   }
 
   return (
     <div className={classes.root}>
       <Head>
-        <title>Chat</title>
+        <title>{user.name}</title>
         <meta name="description" content="Created by Adi" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -85,49 +116,35 @@ const Home: NextPage = () => {
             <Grid columns={27}>
               <Grid.Col span={7}>
                   <Stack className='chatBoxHolder' sx={{marginTop:"20px"}}>
-                      {inbox.map((chat:any) =>(
-                        <Card onClick={() => handleCard(`${chat.id}`)}  className='CustomCard' key={chat.id} sx={{ }}>
+                      {inbox && inbox.map((chat:any) =>{
+                        if(chat.id !== user.id){
+                        return(
+                        <Card onClick={() => handleCard(`${chat.id}`, chat.name)}  className='CustomCard' key={chat.id} sx={{ }}>
                           <Group >
                           <Avatar color="cyan" radius="xl">{chat.name.slice(0, 2)}</Avatar>
                           <Text >{chat.name}</Text>
                           </Group>
                         </Card>
-                      ))}
+                      )
+                    }
+                    else{
+                      return(<></>)
+                    }
+})}
                   </Stack>
               </Grid.Col>
               <Grid.Col  ref={messagesEndRef} sx={{position:"relative"}}  span={20}>
-                <Group className='bar'>
+                {message && (<Group className='bar'>
                     <Avatar color="cyan" radius="xl">{receiver.slice(0, 2)}</Avatar>
                     <Text sx={{color:"white"}} >{receiver}</Text>
-                </Group>
+                </Group> )}
                 <div className='messageBoxHolder'>
-                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
-                <Message msg={"hola"} send={false} />
-                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
-                <Message msg={"hola"} send={false} />
-                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
-                <Message msg={"hola"} send={false} />
-                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
-                <Message msg={"hola"} send={false} />
-                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
-                <Message msg={"hola"} send={false} />
-                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
-                <Message msg={"hola"} send={false} />
-                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
-                <Message msg={"hola"} send={false} />
-                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
-                <Message msg={"hola"} send={false} />
-                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
-                <Message msg={"hola"} send={false} />
-                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
-                <Message msg={"hola"} send={false} />
-                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
-                <Message msg={"hola"} send={false} />
-                <Message msg={"Helsddddddddddddddddddddddddddddddddddddddddddddddddlo"} send={true} />
-                <Message msg={"hola"} send={false} />
+                  {empty ? message.messages.map(text =>(
+                      <Message msg={text.Text} sender={user.name} receiver={receiver} send={isSender ? text.Sender : text.Receiver} />
+                  )) : (<></>)}
                 <div ref={messagesEndRef} />
               </div>
-              <MessageSender/>
+              {message && ( <MessageSender chatId={message._id} isSender={isSender} scrollToBottom={scrollToBottom} /> )}
               </Grid.Col>
             </Grid>
           </Grid.Col>

@@ -4,9 +4,10 @@ import { useEffect } from 'react'
 import Form from '../components/Form'
 
 const login: NextPage = () => {
+  const router = useRouter()
+
   useEffect(() => {
     const User = localStorage.getItem("User")
-    const router = useRouter()
     if(User){
       router.push("/")
     }

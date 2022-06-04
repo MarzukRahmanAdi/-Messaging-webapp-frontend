@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {  useContext } from 'react';
 import { useForm, useToggle, upperFirst } from '@mantine/hooks';
 import {
   TextInput,
@@ -14,10 +14,12 @@ import {
 } from '@mantine/core';
 import axios from 'axios';
 import { useRouter } from 'next/router';
+import { UsersContext } from '../context api/User';
 // import { GoogleButton, TwitterButton } from '../SocialButtons/SocialButtons';
 
 export default function AuthenticationForm(props: PaperProps<'div'>) {
   const [type, toggle] = useToggle('login', ['login', 'register']);
+  const [user, setUser] = useContext(UsersContext)
   const form = useForm({
     initialValues: {
       email: '',
@@ -57,7 +59,8 @@ export default function AuthenticationForm(props: PaperProps<'div'>) {
       }).then(res =>{
         console.log(res.data.Response)
         localStorage.setItem("User", JSON.stringify(res.data.Response))
-        router.push("")
+        setUser(res.data.Response)
+        router.push("/")
       }).catch(err =>{
         console.log(err);
         // alert(err.response ? err.response.data.message : err)

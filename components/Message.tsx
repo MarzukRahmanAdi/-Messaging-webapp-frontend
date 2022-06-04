@@ -4,9 +4,11 @@ import { AppProps } from "next/app"
 
 
 
-const Message:NextPage = ({msg, send} : AppProps) =>{
-    const sender = "Adi"
-    const receiver = "Jony"
+const Message:NextPage = ({msg, send, sender, receiver} : AppProps) =>{
+
+    console.log();
+    
+
     return(
         <div className="messages">
         {/* <Box className={send? "Visible" : "Invisible"}>
