@@ -14,6 +14,8 @@ import { NextLink } from '@mantine/next'
 import { InboxContext } from '../context api/Inbox'
 import axios from 'axios'
 import MessageSender from '../components/MessageSender'
+import { io } from 'socket.io-client'
+import { showNotification } from '@mantine/notifications'
 
 const Home: NextPage = () => {
   const {classes} = useStyles()
@@ -24,43 +26,83 @@ const Home: NextPage = () => {
   const [inbox, setInbox] = useContext(InboxContext)
   const [isSender, setIsSender] = useState(false)
   const [empty, setEmpty] = useState(false)
+  const [chatOpened, setChatOpened] = useState(false)
+  const socket = useRef()
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
   const router = useRouter()
-  useEffect(() => {
+
+
+  useEffect(async() => {
+    // Seting up this user
+    socket.current = io("ws://localhost:3002");
     scrollToBottom()
     let LocalUser = localStorage.getItem("User")
     if(!LocalUser){
       router.push("/login")
     } else {
         LocalUser = JSON.parse(LocalUser)
-        setUser(LocalUser)
+        await setUser(LocalUser)
         axios.get("http://localhost:3001/users/").then(res =>{
           console.log(res.data);
           const Inboxes = res.data.filter(us => us.id !== user.id)
           setInbox(Inboxes)
           // inbox.map(x => console.log(x)) 
 
-        }).catch(err => alert(err))
+        }).then(() =>{
 
+            console.log("emitting ", LocalUser.id);
+            socket.current.emit("addUser", LocalUser.id);
+        }).then(()=>{
+
+          console.log(inbox)
+          socket.current.on("getMessage", (data) => {
+            console.log(data)
+            console.log("[------------------------------------chatsss--------",chatOpened);
+            
+            if(chatOpened && data.senderId == message.Receiver){
+              let newMsg = {
+                Sender: !isSender,
+                Receiver: isSender,
+                Text: data.text
+              }
+              setMessage({
+                _id: message._id,
+                Sender: message.Sender,
+                Receiver: message.Receiver,
+                messages: [...message.messages, newMsg]
+            })
+      
+            } else {
+              console.log(inbox); 
+              showNotification({
+                  title: data.senderName,
+                  message: data.text
+                })
+            }
+          });
+        }).catch(err => alert(err))
     }
   }, []);
 
+  
 
 
   //getting all the messages
   function handleCard(id, name){
     console.log(user)
+    setChatOpened(true)
+
     axios.get(`http://localhost:3001/users/${user.id}/message/${id}`).then(res=>{
         console.log(res)
+
         if(res.data[0]){
           //Some times my server sends a array data.
           console.log(res.data[0]);
           setMessage(res.data[0])
           setReceiver(name)
-
           if(res.data[0].messages.length !== 0){
             setEmpty(true)
           }
@@ -144,7 +186,7 @@ const Home: NextPage = () => {
                   )) : (<></>)}
                 <div ref={messagesEndRef} />
               </div>
-              {message && ( <MessageSender chatId={message._id} isSender={isSender} scrollToBottom={scrollToBottom} /> )}
+              {message && ( <MessageSender socket={socket.current} chatId={message._id} isSender={isSender} scrollToBottom={scrollToBottom} /> )}
               </Grid.Col>
             </Grid>
           </Grid.Col>

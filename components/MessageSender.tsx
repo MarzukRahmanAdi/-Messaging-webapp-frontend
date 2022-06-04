@@ -3,41 +3,45 @@ import { Group, ThemeIcon } from "@mantine/core"
 import axios from "axios"
 import { NextPage } from "next"
 import { useContext, useEffect, useState } from "react"
+import { InboxContext } from "../context api/Inbox"
 import { MessageContext } from "../context api/Message"
+import { UsersContext } from "../context api/User"
+import handleMsg from '../functions/handleMsg'
 
 
-
-const  MessageSender:NextPage = ({chatId, isSender, scrollToBottom}: AppProps) => {
+const  MessageSender:NextPage = ({ socket, chatId, isSender, scrollToBottom}: AppProps) => {
     const [msg, setMsg] = useState()
     const [message, setMessage] = useContext(MessageContext)
+    const [user, setUser] = useContext(UsersContext)
 
     const handleSubmit = () =>{
-
+        if(!msg) return
         axios.post("http://localhost:3001/users/PushMessage", {
             chatId : chatId,
             Sender: isSender,
             Receiver: !isSender,
             Text: msg
-        }).then(res=>{
+        }).then(async (res)=>{
             console.log(res.data);
-            setMsg("")
             let newMsg = {
                 Sender: isSender,
                 Receiver: !isSender,
                 Text: msg
             }
+            setMsg("")
             // newMessage.messages.push()
             console.log(...message.messages);
-            let newMessage = message;
 
             setMessage({
                 _id: chatId,
-                Sender: newMessage.Sender,
-                Receiver: newMessage.Receiver,
+                Sender: message.Sender,
+                Receiver: message.Receiver,
                 messages: [...message.messages, newMsg]
             })
             scrollToBottom()
-            console.log(message)
+            const receiver = isSender ? message.Receiver : message.Sender
+            const result = await handleMsg(user.id, receiver , newMsg.Text, socket, user.name);
+            console.log(result)
         }).catch(err =>{
             alert(err)
         })
