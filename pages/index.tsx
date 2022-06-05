@@ -46,8 +46,10 @@ const Home: NextPage = () => {
       router.push("/login")
     } else {
         LocalUser = JSON.parse(LocalUser)
+      
+        //add your websocket link here -------->
         if(!socket.current) socket.current = io("ws://localhost:3002");
-        socket.current.emit("addUser", LocalUser.id);
+        if(socket.current) socket.current.emit("addUser", LocalUser.id);
 
         await setUser(LocalUser)
         axios.get("http://localhost:3001/users/").then(res =>{
@@ -66,7 +68,7 @@ const Home: NextPage = () => {
   }, [receiver])
 
 const getMsg = () =>{
-  socket.current.on("getMessage", (data) => {
+  if(!socket.current) socket.current.on("getMessage", (data) => {
 
       
       if(receiver && data.senderId === receiver.id){
@@ -96,6 +98,7 @@ const getMsg = () =>{
   //getting all the messages
   function handleCard(id, name){
 
+    //add your backend url here ->
     axios.get(`http://localhost:3001/users/${user.id}/message/${id}`).then(res=>{
 
         if(res.data[0]){

@@ -16,6 +16,8 @@ const  MessageSender:NextPage = ({ socket, chatId, isSender, scrollToBottom}: Ap
 
     const handleSubmit = () =>{
         if(!msg) return
+
+        //add your backend url here ->
         axios.post("http://localhost:3001/users/PushMessage", {
             chatId : chatId,
             Sender: isSender,
