@@ -19,14 +19,14 @@ import { showNotification } from '@mantine/notifications'
 
 const Home: NextPage = () => {
   const {classes} = useStyles()
-  const [receiver, setReceiver] = useState("")
+  const [receiver, setReceiver] = useState({name : "", id : ""})
   const messagesEndRef = useRef(null)
   const [user , setUser] = useContext(UsersContext)
   const [message, setMessage] = useContext(MessageContext)
   const [inbox, setInbox] = useContext(InboxContext)
   const [isSender, setIsSender] = useState(false)
   const [empty, setEmpty] = useState(false)
-  const [chatOpened, setChatOpened] = useState(false)
+  // const [chatOpened, setChatOpened] = useState(false)
   const socket = useRef()
 
   const scrollToBottom = () => {
@@ -35,95 +35,94 @@ const Home: NextPage = () => {
   const router = useRouter()
 
 
+  
   useEffect(async() => {
     // Seting up this user
-    socket.current = io("ws://localhost:3002");
+
+
     scrollToBottom()
     let LocalUser = localStorage.getItem("User")
     if(!LocalUser){
       router.push("/login")
     } else {
         LocalUser = JSON.parse(LocalUser)
+        if(!socket.current) socket.current = io("ws://localhost:3002");
+        socket.current.emit("addUser", LocalUser.id);
+
         await setUser(LocalUser)
         axios.get("http://localhost:3001/users/").then(res =>{
-          console.log(res.data);
           const Inboxes = res.data.filter(us => us.id !== user.id)
           setInbox(Inboxes)
-          // inbox.map(x => console.log(x)) 
 
-        }).then(() =>{
 
-            console.log("emitting ", LocalUser.id);
-            socket.current.emit("addUser", LocalUser.id);
-        }).then(()=>{
-
-          console.log(inbox)
-          socket.current.on("getMessage", (data) => {
-            console.log(data)
-            console.log("[------------------------------------chatsss--------",chatOpened);
-            
-            if(chatOpened && data.senderId == message.Receiver){
-              let newMsg = {
-                Sender: !isSender,
-                Receiver: isSender,
-                Text: data.text
-              }
-              setMessage({
-                _id: message._id,
-                Sender: message.Sender,
-                Receiver: message.Receiver,
-                messages: [...message.messages, newMsg]
-            })
-      
-            } else {
-              console.log(inbox); 
-              showNotification({
-                  title: data.senderName,
-                  message: data.text
-                })
-            }
-          });
         }).catch(err => alert(err))
     }
   }, []);
 
-  
 
+  useEffect(() => {
+      getMsg()
+
+  }, [receiver])
+
+const getMsg = () =>{
+  socket.current.on("getMessage", (data) => {
+
+      
+      if(receiver && data.senderId === receiver.id){
+
+        let newMsg = {
+          Sender: !isSender,
+          Receiver: isSender,
+          Text: data.text
+        }
+        setMessage({
+          _id: message._id,
+          Sender: message.Sender,
+          Receiver: message.Receiver,
+          messages: [...message.messages, newMsg]
+      })
+
+      } else if(data.senderId !== receiver.id){ 
+
+        showNotification({
+            title: data.senderName,
+            message: data.text
+          })
+      }
+    });
+}
 
   //getting all the messages
   function handleCard(id, name){
-    console.log(user)
-    setChatOpened(true)
 
     axios.get(`http://localhost:3001/users/${user.id}/message/${id}`).then(res=>{
-        console.log(res)
 
         if(res.data[0]){
-          //Some times my server sends a array data.
-          console.log(res.data[0]);
+
           setMessage(res.data[0])
-          setReceiver(name)
+          setReceiver({name : name, id : id})
           if(res.data[0].messages.length !== 0){
             setEmpty(true)
           }
 
           if(res.data[0].Sender === user.id){
-            console.log
+            
             setIsSender(true)
           }
 
         } else if(res.data) {
           //Some times my server sends a raw data.
-          console.log(res.data);
+
           setMessage(res.data)
-          setReceiver(name)
+          setReceiver({name : name, id : id})
 
           if(res.data.messages.length !== 0){
             setEmpty(true)
           }
 
           if(res.data.Sender === user.id){
-            console.log
+
             setIsSender(true)
           }
 
@@ -177,12 +176,12 @@ const Home: NextPage = () => {
               </Grid.Col>
               <Grid.Col  ref={messagesEndRef} sx={{position:"relative"}}  span={20}>
                 {message && (<Group className='bar'>
-                    <Avatar color="cyan" radius="xl">{receiver.slice(0, 2)}</Avatar>
-                    <Text sx={{color:"white"}} >{receiver}</Text>
+                    <Avatar color="cyan" radius="xl">{receiver.name.slice(0, 2)}</Avatar>
+                    <Text sx={{color:"white"}} >{receiver.name}</Text>
                 </Group> )}
                 <div className='messageBoxHolder'>
                   {empty ? message.messages.map(text =>(
-                      <Message msg={text.Text} sender={user.name} receiver={receiver} send={isSender ? text.Sender : text.Receiver} />
+                      <Message msg={text.Text} sender={user.name} receiver={receiver.name} send={isSender ? text.Sender : text.Receiver} />
                   )) : (<></>)}
                 <div ref={messagesEndRef} />
               </div>
@@ -192,8 +191,8 @@ const Home: NextPage = () => {
           </Grid.Col>
             <Grid.Col span={7}>
               <Center sx={{display:"flex", flexDirection:"column", marginTop:"50px"}}>
-                <Avatar sx={{width:"100px", height:"100px", borderRadius:"50px"}} color="cyan" radius="xl">{receiver.slice(0, 2)}</Avatar>
-                <Text sx={{color:"white"}} weight="normal" size="xl" >{receiver}</Text>
+                {receiver && (<> <Avatar sx={{width:"100px", height:"100px", borderRadius:"50px"}} color="cyan" radius="xl">{receiver.name.slice(0, 2)}</Avatar>
+                <Text sx={{color:"white"}} weight="normal" size="xl" >{receiver.name}</Text></>)}
               </Center>
 
             </Grid.Col>

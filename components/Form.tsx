@@ -44,6 +44,10 @@ export default function AuthenticationForm(props: PaperProps<'div'>) {
         Email:form.values.email
       }).then(res =>{
         console.log(res.data.response)
+        if(res.data.response === "Wrong Password"){
+          alert("wrong password")
+          return
+        }
         localStorage.setItem("User", JSON.stringify(res.data.response))
         router.push("/")
       }).catch(err =>{
