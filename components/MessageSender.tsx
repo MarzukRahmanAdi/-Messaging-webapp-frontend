@@ -22,7 +22,6 @@ const  MessageSender:NextPage = ({ socket, chatId, isSender, scrollToBottom}: Ap
             Receiver: !isSender,
             Text: msg
         }).then(async (res)=>{
-            console.log(res.data);
             let newMsg = {
                 Sender: isSender,
                 Receiver: !isSender,
@@ -30,7 +29,7 @@ const  MessageSender:NextPage = ({ socket, chatId, isSender, scrollToBottom}: Ap
             }
             setMsg("")
             // newMessage.messages.push()
-            console.log(...message.messages);
+  
 
             setMessage({
                 _id: chatId,
@@ -41,7 +40,6 @@ const  MessageSender:NextPage = ({ socket, chatId, isSender, scrollToBottom}: Ap
             scrollToBottom()
             const receiver = isSender ? message.Receiver : message.Sender
             const result = await handleMsg(user.id, receiver , newMsg.Text, socket, user.name);
-            console.log(result)
         }).catch(err =>{
             alert(err)
         })

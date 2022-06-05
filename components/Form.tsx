@@ -35,7 +35,7 @@ export default function AuthenticationForm(props: PaperProps<'div'>) {
   });
   const router = useRouter()
   const handleSubmit = (e) =>{
-    console.log(type)
+  
     
     if(type === "login"){
       // axios.get('http://localhost:3001/users').then((users:any) => {console.log(users.data)})
@@ -43,7 +43,6 @@ export default function AuthenticationForm(props: PaperProps<'div'>) {
         Password: form.values.password,
         Email:form.values.email
       }).then(res =>{
-        console.log(res.data.response)
         if(res.data.response === "Wrong Password"){
           alert("wrong password")
           return
@@ -51,7 +50,6 @@ export default function AuthenticationForm(props: PaperProps<'div'>) {
         localStorage.setItem("User", JSON.stringify(res.data.response))
         router.push("/")
       }).catch(err =>{
-        console.log(err.response.data.message);
         alert(err.response.data.message ? err.response.data.message : err)
       })
     } else {
@@ -61,16 +59,15 @@ export default function AuthenticationForm(props: PaperProps<'div'>) {
         Password: form.values.password,
         Email:form.values.email
       }).then(res =>{
-        console.log(res.data.Response)
         localStorage.setItem("User", JSON.stringify(res.data.Response))
         setUser(res.data.Response)
         router.push("/")
       }).catch(err =>{
-        console.log(err);
+
         // alert(err.response ? err.response.data.message : err)
       })
     }
-    console.log(form.values)
+
   }
 
   return (
